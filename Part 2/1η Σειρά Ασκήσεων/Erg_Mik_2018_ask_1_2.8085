@@ -1,0 +1,63 @@
+IN 10H 	
+LXI B,00C8H	;Xronoka8ysterhsh 00C8H = 200d msec
+
+MVI A,10H
+LXI H,0900H	;Arxikopoioume tis 8eseis mnhmhs 0900H ews 0905H
+MOV M,A	;me thn timh 10H
+INX H		;Argotera, mesw ths STDM kai ths DCD
+MOV M,A	;oi 8eseis aytes 8a antistoixh8oun sta pshfia
+INX H		;ths o8onhs. O kwdikos 10H antistoixei sto keno " "
+MOV M,A
+INX H 
+MOV M,A
+INX H
+MOV M,A
+INX H
+MOV M,A
+
+LXI D,0900H
+CALL STDM
+CALL DCD
+
+MVI A,0DH	;Arxikopoihsh maskas diakopwn (0D H = 00001101 b)
+SIM	
+EI
+
+MVI A,00H
+
+LOOPC:
+
+PUSH PSW	;Proballoume ston endeikth 7 tmhmatwn
+LXI D,0900H
+CALL STDM
+CALL DCD
+POP PSW
+
+ANI 0FH	;Metrhsh apo 0 ews 15
+CMA
+STA 3000H
+CMA
+INR A
+
+CALL DELB
+
+JMP LOOPC
+				
+
+INTR_ROUTINE:
+PUSH PSW
+LDA 2000H
+RLC		;Ean o MSB diakopths einai ON,
+JNC END_ROUT	;pame apey8eias sto telos
+
+LDA 0905H	;Diaforetika ayksanoume ton metrhth diakopwn
+INR A		;Kai apo8ykeyoume sth 8esh 0905H
+ANI 0FH	;Efoson xrhsimopoioume thn STDM me [DC]=0900H,
+STA 0905H	;h 8esh 0905H 8a antistoixh8ei ston aristerotero endeikth
+
+END_ROUT:
+POP PSW
+EI
+RET
+
+END

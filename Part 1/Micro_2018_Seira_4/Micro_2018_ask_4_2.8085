@@ -1,0 +1,97 @@
+IN 10H
+
+MVI A,0DH	;Arxikopoihsh maskas diakopwn (0D H = 00001101 b)
+SIM		
+EI
+
+MVI A,10H
+LXI H,0902H	;Arxikopoioume tis 8eseis mnhmhs 0902H ews 0905H
+MOV M,A	;me thn timh 10H
+INX H		;Argotera, mesw ths STDM kai ths DCD
+MOV M,A	;oi 8eseis aytes 8a antistoixh8oun sta pshfia
+INX H		;ths o8onhs. O kwdikos 10H antistoixei sto keno " "
+MOV M,A
+INX H 
+MOV M,A
+INX H
+MOV M,A
+INX H
+MOV M,A
+
+
+MVI C,0EH	;Ka8' ypodeiksh ths ekfwnhshs, epilegoume
+MVI D,77H	;tyxaies times gia ta C,D,E opou
+MVI E,C3H	;(C)=K1 < (D)=K2 < (E)=K3
+
+START:		;Oso perimenoume th diakoph
+DI		;deixnoume ton teleytaio ari8mo pou
+PUSH D		;diabasame apo to plhtkrologio sthn o8onh
+LXI D,0900H
+CALL STDM
+CALL DCD
+POP D
+EI
+JMP START	
+
+INTR_ROUTINE:
+PUSH PSW	;Kratame tis times twn kataxwrhtwn pou 8a xrhsimopoihshoume
+PUSH B		;Mas noiazoun kyriws oi kataxwrhtes C,D,E
+PUSH D		;pou periexoun ta katwflia K1,K2,K3
+
+MVI A,10H	;Arxikopoioume ton A sto 10H > 0FH
+LOOP1:
+CALL KIND	;Diabazoume apo to plhktologio
+CPI 10H	;Mexri na do8ei timh (kwdikos) <10H
+JNC LOOP1
+STA 0901H	;Grafoume ton ari8mo (MSB pshfio) sth 8esh 0901H
+
+MVI A,10H	;Omoia gia to LSB pshfio
+LOOP2:
+CALL KIND
+CPI 10H
+JNC LOOP2
+STA 0900H	;To grafoume sth 8esh 0900h
+MOV B,A	;Kai epipleon to kanoume back up kai ston B
+
+LDA 0901H	;Pairnoume to prwto pshfio
+RRC		;Kai to peristrefoume 4 fores
+RRC		;(0000xyzw -> xyzw0000)
+RRC
+RRC
+ADD B		;Kai tou pros8etoume to LSB gia na ftiaksoume eniaio ton ari8mo
+
+MVI B,01H	;O B 8a deixnei poia LEDs prepei na anapsoun
+INR C		;Epeidh 8eloume to diasthma [0,K1], ayksanoume to (C)
+CMP C		;kai sygkrinoume me ton K1+1
+JC LEDS	;8a ginei alma ann A<K1+1, dhladh an A anhkei [0,K1]
+
+MVI B,02H	;Omoia gia to K2
+INR D
+CMP D
+JC LEDS
+
+MVI B,04H	;Omoia gia to K3
+INR E
+CMP E
+JC LEDS
+
+MVI B,08H	;Ftanoume edw ann A>K3, dhladh A anhkei (K3,FFH]
+
+LEDS:		;Anaboume ta LEDs kata ta gnwsta
+MOV A,B	;O B deixnei poia LEDs 8eloume analoga me thn parapanw diereynhsh
+CMA
+STA 3000H
+
+LXI D,0900H	;Grafoume sthn o8onh kata ta gnwsta
+CALL STDM	;8ymizoume pws exoume apo8hkeysei ton ari8mo
+CALL DCD	;MSB->0901H, LSB->0900H
+	
+POP D		;Epanaferoume tis times prin thn klhsh ths routinas
+POP B		;me antistrofh seira apo ekeinh pou tis balame sth stoiba
+POP PSW
+
+EI		;Epitrepoume tis diakopes ka8ws parempodisthkan 
+		;aytomata sthn arxh ths routinas eksyphrethshs
+RET
+
+END

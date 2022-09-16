@@ -1,0 +1,59 @@
+IN 10H
+
+LXI B,03E8H	;Xronoka8ysterhsh 03E8H = 1000d msec (1 sec)
+MVI E,00H	;8a apo8hkeyoume ston E thn timh twn LEDs
+
+ELEGXOS:
+LDA 2000H
+RLC		;Elegxoume to MSB switch
+JNC ELEGXOS	;Epanalambanoume ton elegxo mexri na anoiksei o diakopths
+
+PANW:		;H metrhsh ksekinaei apo to mhden
+MOV A,E
+CMA
+STA 3000H
+
+LDA 2000H	;Diabazoume tous diakoptes
+ANI 0FH	;Kratame ta 4 LSB
+JZ ELEGXOS	;Ean to anw orio einai 0, perimenoume
+MOV D,A	;Apo8hkeyoume ston D gia na mporoume eley8era na paizoume me ton A
+
+
+PANW_M:	
+
+CALL DELB
+
+ELEGXOS_P:	;Elegxoume ton MSB diakopth
+LDA 2000H	;Ean einai ON, perimenoume
+RLC
+JNC ELEGXOS_P
+
+INR E
+MOV A,E
+
+CMP D		;Ean ftasame sto panw orio,
+JZ KATW_M	;arxizoume na metrame pros ta katw
+
+CMA
+STA 3000H
+JMP PANW_M
+
+KATW_M:
+CMA
+STA 3000H
+
+CALL DELB
+
+ELEGXOS_K:	;Elegxoume ton MSB diakopth
+LDA 2000H	;Ean einai ON, perimenoume
+RLC
+JNC ELEGXOS_K
+
+DCR E
+MOV A,E
+JZ PANW	;Ean ftasame sto 0, arxizoume na metrame pros ta panw
+
+JMP KATW_M
+
+END
+

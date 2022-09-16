@@ -1,0 +1,68 @@
+IN 10H
+
+MVI A,10H
+LXI H,0900H	;Arxikopoioume tis 8eseis mnhmhs 0900H ews 0905H
+MOV M,A	;me thn timh 10H
+INX H		;Argotera, mesw ths STDM kai ths DCD
+MOV M,A	;oi 8eseis aytes 8a antistoixh8oun sta pshfia
+INX H		;ths o8onhs. O kwdikos 10H antistoixei sto keno " "
+MOV M,A
+INX H 
+MOV M,A
+INX H
+MOV M,A
+INX H
+MOV M,A
+
+START:		
+
+LXI D,0900H
+CALL STDM
+CALL DCD
+
+LOOP1:
+CALL KIND	;Diabazoume apo to plhktologio
+CPI 10H	;Mexri na do8ei timh (kwdikos) <10H, dhladh apo 0 ews F
+JNC LOOP1
+
+RRC		;Kai to peristrefoume 4 fores
+RRC		;(0000xyzw -> xyzw0000)
+RRC		;(ara x->x*16)
+RRC		;(8ymizw pws o ari8mos einai 0xH arxika)
+MOV B,A
+
+LOOP2:
+CALL KIND
+CPI 10H
+JNC LOOP2
+
+ADD B		;=16*x + y
+MVI B,FFH
+MVI C,FFH
+
+EKAT: 		; Ekatontades ston B
+
+INR B		
+SUI 64H	;Afairoume ekatontades mexri na bgei arnhtikos
+JNC EKAT
+ADI 64H	;Pros8etoume 100 gia na dior8wsoume to arnhtiko ypoloipo
+
+
+DECA:		;Dekades ston C
+INR C		 
+SUI 0AH	;Afairoume dekades mexri na bgei arnhtikos
+JNC DECA	 
+ADI 0AH	;Pros8etoume 10 gia na dior8wsoume to arnhtiko upoloipo
+STA 0900H	;Monades ston A kai apo8hkeyoume sth 8esh 0900H
+
+MOV A,C	
+STA 0901H	;Apo8hkeyoume dekades
+
+MOV A,B
+STA 0902H	;Apo8hkeyoume ekatontades
+
+JMP START	
+
+
+
+END

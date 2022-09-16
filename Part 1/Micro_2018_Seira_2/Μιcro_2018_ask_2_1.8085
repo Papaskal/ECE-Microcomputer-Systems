@@ -1,0 +1,107 @@
+;MEROS 1
+
+IN 10H
+
+START:
+LXI H,0900H	;Orizoume thn prwth 8esh mnhmhs
+MVI A,FFH	;Orizoume ton prwto ari8mo pros apo8hkeysh
+
+L1:		;Me ayto to loop apo8hkeyoume touw ari8mous
+MOV M,A	;255 ews 0 stis 8eseis mnhnmhs 0900 H ews 09FF H
+INX H
+DCR A
+CPI 00H	;To loop termatizei otan to A ginei 0 (prin omws to apo8hkeysoume)
+JNZ L1
+
+MOV M,A	;Apo8hkeyoume to 0 sth 8esh 09FF H
+		;sthn praksh de xreiazetai ka8ws h 8esh 09FF H exei
+		;hdh periexomeno 0, afou den thn exoume peiraksei ka8olou
+		;(To grafoume gia logous plhrothtas)
+
+
+;MEROS 2	;8a metrhsoume ta synolika mhdenika
+
+LXI H,0900H	
+MVI C,00H	;To C 8a periexei to loop counter tou L2
+LXI D,0000H	;To plh8os twn 0 8a apo8hkeytei sto D-E
+
+L2:		;To L2 8a lambanei ka8e ari8mo diadoxika (256 fores)
+
+MVI B,09H	;To B 8a periexei to loop counter tou L3
+MOV A,M
+
+L3:		;To L3 8a metraei ta mhdenika ston ekastote ari8mo
+DCR B		;To loop 8a ektelestei 8 fores. To B ksekina apo 
+JZ L4		;to 09 H giati to bhma kai o elegxos ginontai sthn arxh tou loop
+
+RRC		;8a ginoun 8 diadoxika shift kai 
+JC L3
+INX D		;opote briskoume 0, 8a ayksanoume to periexomeno tou D-E
+JMP L3
+
+L4:		;Edw ginetai to bhma kai o elegxos tou
+INX H		;counter tou L2
+DCR C
+JNZ L2
+
+
+
+;MEROS 3
+
+LXI H,0900H
+MVI C,00H	;Apo8hkeyoume sto C to plh8os twn zhtoumenwn ari8mwn
+MVI B,00H	;To B 8a periexei to loop counter tou L5
+
+L5:		;To L5 8a ektelestei 256 fores
+MOV A,M
+CPI 20H	;An o ari8mos einai <20 H, 
+JC NEXT	;den ton prosmetrame
+CPI 71H	;An o ari8mos einai >=71 H (ara >70 H),
+JNC NEXT	;den ton prosmetrame
+INR C
+
+NEXT:		;Bhma kai elegxos tou L5
+INX H
+DCR B
+JNZ L5
+
+
+
+MEROS_4:
+
+LDA 2000H
+MOV B,A
+
+ANI 20H	;Bitwise AND me ton 20H = 0010 0000 b
+CPI 20H	;Kai elegxos gia na doume to status tou 3ou diakopth
+JNZ D6		;An einai OFF, pername ston epomeno diakopth
+MOV A,C	;An einai ON, bazoume thn timh tou C ston A
+JMP LEDS	;Kai anaboume ta LEDS antistoixa
+
+D6:		;Omoia me prin, elegxoume ton 2o diakopth
+MOV A,B
+ANI 40H
+CPI 40H
+JNZ D7
+MOV A,E	;Metaferoume thn timh tou E ston A
+JMP LEDS
+
+D7:		;Omoia me prin, elegxoume ton 1o diakopth
+MOV A,B
+ANI 80H
+CPI 80H
+JNZ NONE
+MOV A,D	;Metaferoume thn timh tou D ston A
+JMP LEDS
+
+NONE:		;An kanenas den einai ON,
+MVI A,00H	;Sbhnoume ta LEDS
+
+LEDS:		;Edw anaboun ta LEDS analoga me thn timh tou A
+CMA		;Ena LED anabei otan to antistoixo bit einai 0
+STA 3000H
+JMP MEROS_4
+
+
+END
+

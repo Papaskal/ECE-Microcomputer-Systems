@@ -1,0 +1,71 @@
+START:
+MVI B,00H	;"Deikths" pou 8a apo8hkeyei tis eksodous prin graftoun sthn 3000H
+
+LDA 2000H
+MOV D,A	;Back up tou status twn diakoptwn ston D
+
+
+;
+X0:		;OR(A0, A1)
+ANI 03H	;Krataw ta 2 teleytaia pshfia (03H = 0000 0011 b)
+CPI 00H	;An estw ena bit einai 1, tote A diaforo tou 0
+JZ X1		;An A einai 0 (ola ta bits=0),prospername thn energopoihsh tou X0
+;
+MOV A,B	;An A diaforo tou 0, energopoioume to X0
+ADI 01H	;01H = 0000 0001 b
+MOV B,A	;O B ginetai xxxx xxx1 b
+
+X1:		;AND(A2, A3)
+MOV A,D	;Idia logikh me prin, alla edw apaitoume kai ta dyo bit na einai 1
+ANI 0CH	;Opote bitwise AND me 0CH = 0000 1100 b
+CPI 0CH	;Kai sygkrish me ton 0000 1100 b
+JNZ X2
+
+MOV A,B
+ADI 02H	;02H = 0000 0010 b
+MOV B,A	;O B ginetai xxxx xx1x b
+	
+		
+X2:		;OR(A4, A5)
+MVI C,00H	;Deikths pou 8a apo8hkeyei an h X2 einai 1
+		;Enallaktika, 8a mporousame na xrhsimopoihsoume argotera ton B
+		;Kai na kanoume AND me ton 0000 0100 b gia na doume thn timh ths X2
+MOV A,D
+ANI 30H	;30H = 0011 0000 b
+CPI 00H
+JZ X3
+
+MVI C,01H
+MOV A,B
+ADI 04H	;04H = 0000 0100 b
+MOV B,A	;O B ginetai xxxx x1xx b
+
+
+X3:		;XOR(Y1, X2) 
+MOV A,D	;opou Y1=AND(A6,A7)
+ANI C0H	;C0H = 1100 0000 b
+CPI C0H
+JZ Y1
+
+MVI A,00H	;An Y1=0, kanoume A=0
+JMP X3_XOR
+
+Y1:
+MVI A,01H	;An Y1=1, kanoume A=1
+
+X3_XOR:	;XOR(Y1,X2) (teliko apotelesma)
+CMP C		;O A periexei thn timh ths Y1 kai o C thn timh ths X2
+JZ LEDS	;An einai idies, prospername thn energopoihsh ths X3
+
+	
+MOV A,B	;Edw energopoieitai h X3
+ADI 08H	;01H = 0000 1000 b
+MOV B,A	;O B ginetai xxxx 1xxx b
+
+LEDS:		;Anaboume ta LEDS symfwna me ta dedomena opws analy8hkan
+MOV A,B	;O B periexei ta bits twn epi8ynhtwn eksodwn
+CMA		;To ekastote LED anabei ann to antistoixo bit einai 0
+STA 3000H	
+JMP START	;Synexhs leitourgia
+
+END

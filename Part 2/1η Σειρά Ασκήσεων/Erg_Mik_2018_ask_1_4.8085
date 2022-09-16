@@ -1,0 +1,91 @@
+IN 10H 	
+LXI B,01F4H	;Xronoka8ysterhsh 01F4H = 500d ms 
+
+MVI E,FEH
+MVI A,FFH	;Apo8hkeyoume sth 0900H to flag gia th fora ths kinhshs
+STA 0900H	;Aristerh:00h, deksia:FFh
+
+MVI A,0DH	;Arxikopoihsh maskas diakopwn (0D H = 00001101 b)
+SIM	
+
+
+
+LEFT_S:	;Allazoume to flag foras kinhshs
+DI		;Opote diaxeirizomaste to flag diakophs,
+LDA 0900H	;8a apenergopoioume tis diakopes proswrina,
+CMA		;wste na apofygoume kapoio api8ano sfalma,
+STA 0900H	;an symbei diakoph en mesw aytwn twn ligwn entolwn
+EI 
+
+LEFT:		;Kinhsh pros ta aristera
+LDA 2000H	;Ean to LSB einai OFF, perimenoume
+RLC
+JNC LEFT
+
+MOV A,E
+STA 3000H
+
+CALL DELB
+
+LEFT_M:	;Elegxoume an prepei na alla3ei h fora
+EI		;logw diakophs
+DI		;Energopoioume stigmiaia tis diakopes prin tis apenergooihsoume,
+LDA 0900H	;giati endexetai an ftasoume edw me alma me tis diakopes apenergopoihmenes,
+RLC		;opote de xanoume diakoph se aythn thn periptwsh
+JC RIGHT_M
+EI
+
+MOV A,E
+RLC		;Ean exoume ftasei sto telos (terma aristera),
+JNC RIGHT_S	;kanoume alma
+
+MOV E,A
+JMP LEFT
+
+RIGHT_S:	;Allazoume to flag foras kinhshs
+DI
+LDA 0900H
+CMA
+STA 0900H
+EI 
+
+RIGHT:		;Kinhsh pros ta deksia
+LDA 2000H	;Ean to LSB einai OFF, perimenoume
+RLC
+JNC RIGHT
+
+MOV A,E
+STA 3000H
+
+CALL DELB
+
+RIGHT_M:	;Elegxoume an prepei na alla3ei h fora
+EI		;logw diakophs
+DI
+LDA 0900H
+RLC
+JNC LEFT_M
+EI
+
+MOV A,E
+RRC		;Ean exoume ftasei sto telos (terma aristera),
+JNC LEFT_S	;kanoume alma
+
+MOV E,A
+JMP RIGHT
+			
+
+INTR_ROUTINE:	;Apla allazoume to flag foras kinhshs
+PUSH PSW	;pou brisketai sth 8esh 0900H
+LDA 2000H	;Kamia shmaia kai kanenas kataxwrhths den ephreazetai
+RLC
+JNC END_ROUT
+LDA 0900H
+CMA
+STA 0900H
+END_ROUT:
+POP PSW
+EI
+RET
+
+END

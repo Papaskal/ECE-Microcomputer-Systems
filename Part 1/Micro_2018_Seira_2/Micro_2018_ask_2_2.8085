@@ -1,0 +1,70 @@
+LXI B,00C8H	;Xronoka8ysterhsh 00C8H = 200d msec
+
+START:
+LDA 2000H
+RRC		;Elegxoume to LSB switch
+JC LSB_ON	;An LSB = 1, kanoume alma
+
+JMP START	;Epanalambanoume th diadikasia mexri na anoiksei o diakopths
+
+LSB_ON:	;O diakopths phge sto ON
+LDA 2000H
+RRC		;Elegxoume to diakopth,
+JC LSB_ON	;Epanalambanoume th diadikasia mexri na paei sto OFF
+
+OFF:		;Diakopths pisw sto OFF
+MVI E,00H	;O E 8a periexei to metrhth mas gia na mhn kseperasoume ta 15 sec
+MVI H,00H	;O H 8a periexei to status twn LEDs
+
+OFF_START:	;8a to ylopoihsoume wste ta LEDs na anaboun h sbhnoun mia fora ana sec
+INR E
+
+MOV A,H	;Anaboume h sbhnoume ta LEDs analoga me to prohgoumeno status tous
+STA 3000H
+CMA		;Antistrefoume to status na eimaste etoimoi gia to epomeno loop
+MOV H,A
+
+MVI L,00H	;8eloume na elegxoume tous diakoptes ana 200msec
+ELEGXOS_OFF:	;Alla kalytera ta fwtakia na mhn anabosbhnoun toso grhgora
+CALL DELB	;Opote 8a kanoume 5 loops ka8ysterhshs twn 200msec (5x200msec = 1sec)
+INR L		;Kai 8a apo8hkeysoume to loop counter ston L
+LDA 2000H	;Se ka8e loop 8a elegxoume tous diakoptes
+RRC		;Ean ginei ON, 8a pame sto antistoixo loop elegxou sthn ON katastash
+JC ELEGXOS_ON
+MOV A,L
+CPI 05H
+JC ELEGXOS_OFF
+
+MOV A,E
+CPI 10H	;Sthn arxh tou 16ou sec (dhladh sto telos twn 15 sec) ta LEDs 8a sbhnoun
+JC OFF_START
+JMP START
+
+
+ON_DURING:
+INR E
+
+MOV A,H
+STA 3000H
+CMA
+MOV H,A
+
+MVI L,00H
+ELEGXOS_ON:	;Omoia me to "ELEGXOS_OFF"
+CALL DELB	;Shmeiwnoume pws otan egine to alma krathsame thn idia timh tou L
+INR L
+LDA 2000H
+RRC
+JNC OFF
+MOV A,L
+CPI 05H
+JC ELEGXOS_ON
+
+MOV A,E
+CPI 10H
+JC ON_DURING
+JMP START
+
+
+END
+

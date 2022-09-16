@@ -1,0 +1,48 @@
+IN 10H
+
+START:
+MVI A,09H	;Arxikopoioume sto 09H>08H
+CALL KIND	;Diabazoume plhktrologio
+
+CPI 09H	;An path8hke kati me kwdiko>08h,
+JNC START	;pame pali sthn arxh
+
+CPI 08H	;An path8hke to 8
+JZ KEY_8	;anabosbhnoume ta LEDS
+
+MVI B,07H	;Diaforetika, to sygkrinoume diadoxika
+		;me olous tous ari8mous apo 7 ews 0
+LOOP1:	
+CMP B
+JZ LEDS
+DCR B
+JNZ LOOP1
+
+LEDS:		;Arxikopoioume tis times
+MVI A,80H	;wste to prwto loop na einai "axrhsto"
+INR B		;mias kai 8a ginei sigoura
+		;(o elegxos tou counter ginetai sto telos)
+LOOP2:		;Kanoume peristrofes analoga me ton ari8mo pou brhkame
+RLC		
+DCR B
+JNZ LOOP2
+CMA		;Anaboume ta arnhtikhs logikhs LEDS
+STA 3000H
+
+JMP START
+
+KEY_8:		;Path8hke to 8
+MVI A,00H
+LXI B,0200H	;8etoume to B-C sta 0200H=512D
+MVI E,14H	;8etoume ton counter sta 14H=20D
+
+LOOP3:		;Anabei kai sbhnei apo 10 fores ta LEDS
+STA 3000H
+CMA
+CALL DELB	;Ka8ysterhsh ish me 512ms
+DCR E		;To loop ginetai 20 fores (10 anabei, 10sbhnei)
+JNZ LOOP3
+
+JMP START
+
+END

@@ -1,0 +1,76 @@
+IN 10H
+
+MVI A,0DH	;Arxikopoihsh maskas diakopwn (0D H = 00001101 b)
+SIM	
+EI
+		;8ymizoume pws to programma ston ypologisth mas me ton TSIK trexei
+		;poly pio grhgora apo to anamenomeno. An 8eloume elegxoume thn
+		;taxythta tou simulator me thn mpara pio panw gia swstoterh prosomoiwsh
+LXI B,0064H	;Bazoume sto B-C thn ka8ysterhsh poy 8eloume sth DELB
+		;Estw 0.100 sec = 100msec (100 d = 0064 H)
+		;H DELB 8a ektelestei 10 fores/sec
+MVI A,10H
+LXI H,0902H	;Arxikopoioume tis 8eseis mnhmhs 0902H ews 0905H
+MOV M,A	;me thn timh 10H
+INX H		;Argotera, mesw ths STDM kai ths DCD
+MOV M,A	;oi 8eseis aytes 8a antistoixh8oun sta 4 MSB pshfia
+INX H		;ths o8onhs. O kwdikos 10H antistoixei sto keno " "
+MOV M,A
+INX H 
+MOV M,A
+
+START:
+JMP START	
+
+INTR_ROUTINE:		;H routina diarkei apo ta 59 ews kai ta 0 sec
+			;dhladh synolo ena lepto
+
+MVI A,05H		;Metrhths gia to LOOP1		
+LOOP1:			;Edw einai to loop gia tis dekades (apo 5 ews 0)
+STA 0901H		;Apo8hkeyoume to plh8os twn dekadwn sth mnhmh
+DCR A
+MOV L,A
+
+MVI A,0AH		;Metrhths gia to LOOP2
+LOOP2:			;Loop gia ta sec (apo 9 ews 0)
+DCR A
+
+MVI H,0AH		;Metrhths gia to LOOP_TURN
+MVI D,FFH		;O D 8a krataei thn katastash twn LEDs
+LOOP_TURN:		;Ta LEDs anaboun 5 fores kai sbhnoun 5 fores
+PUSH H			;se diarkeia 1 sec
+PUSH PSW		;To loop ka8e fora antistrefei to status twn LEDs
+PUSH D			;opote ekteleitai 10 fores
+STA 0900H
+LXI D,0900H		;Grafoume sth o8onh
+CALL STDM
+CALL DCD
+CALL DELB
+POP D
+MOV A,D		;Allazoume to status twn LEDs
+CMA
+STA 3000H
+MOV D,A
+POP PSW
+POP H
+EI			;Mono se ayto to shmeio epitrepoume tis diakopes (dhladh ana 100msec)
+DI			;gia na mh xalasoun times kataxwrhtwn sto endiameso
+DCR H			;(epithdes dn kanoume PUSH kai POP sthn arxh ths routinas,
+JNZ LOOP_TURN		;8eloume na yparxoun kapoies koines times se periptwsh diplhs diakophs)
+
+CPI 00H
+JNZ LOOP2
+
+MOV A,L
+CPI FFH
+JNZ LOOP1
+
+MVI H,01H		;8etoume tis times twn kataxwrhtwn stis times poy 
+MVI A,00H		;prepei na exoun sto telos gia sigouria
+MVI L,FFH		;se periptwsh diplhs diakophs
+
+EI			;Epitrepoume tis diakopes ka8ws sto teleytaio
+			;perasma tou LOOP_TURN parempodisthkan
+RET
+
+END

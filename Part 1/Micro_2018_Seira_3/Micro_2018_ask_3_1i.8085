@@ -1,0 +1,28 @@
+IN 10H
+
+START:
+LDA 2000H
+MVI B,08H
+
+LOOP1:		;Diabazw tous diakoptes apo aristera pros ta deksia
+RLC		;mexri na brw to prwto OFF
+JNC LEDS	;h mexri na diabasw kai tous 8 (an einai oloi ON)
+DCR B
+JNZ LOOP1
+
+LEDS:		;An (ksekinwntas apo aristera) o x diakopths einai OFF
+MVI A,FFH	;8elw na anapsw ta 9-x LSB LEDS
+INR B		;Ayksanoume kata ena to B, giati parakatw
+		;to prwto run tou loop einai "axrhsto"
+LOOP2:		;8eloume "axrhsto" to prwto perasma
+RLC		;gia thn periptwsh pou einai ola ON
+INR A		;Se ka8e perasma kanoume peristrofh kai
+DCR B		;pros8etoume 01H, dhladh 8etoume to LSB sto 1 (arxika htan 0)
+JNZ LOOP2
+
+CMA		;Antistrefoume giati ta LEDS einai arnhtikhs logikhs
+STA 3000H
+JMP START
+
+
+END

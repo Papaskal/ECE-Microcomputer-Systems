@@ -1,0 +1,121 @@
+IN 10H		       
+LXI H,0902H	;8etoume sth 8eseis mnhmhs
+MVI M,10H	;0902H ews 0905H
+INX H		;ton ari8mo 10H
+MVI M,10H	;pou einai o kwdikos tou " "
+INX H		;wste telika, otan emfanisoume sthn o8onh
+MVI M,10H	;na mhn anapsoun ta 4 prwta pshfia
+INX H			
+MVI M,10H		
+
+START:
+
+MVI D,FEH	;Ssekinaw apo thn prwth grammh
+MOV A,D	;FE H = 11111110 b
+
+;Grammh 0: INSTR STEP, FETCH PC          
+STA 2800H	
+LDA 1800H	;Diabazw tis sthles
+ANI 07H	;mhdenizw ta 5 MSB
+MVI C,86H	;INSTR STEP: kwdikos 86H
+CPI 06H	;Sygkrinw me to (00000)110 (1o plhktro)
+JZ PRINT	;An path8hke, kanoume print   
+MVI C,85H	;FETCH PC:kwdikos 85H
+CPI 05H	;Sygkrinw me to (00000)101 (2o plhktro)
+JZ PRINT                     
+
+MOV A,D	;Ka8e fora mono ena bit einai 0
+RLC		;Me peristrofh aristera,
+MOV D,A	;epilegoume thn epomenh grammh
+
+;Grammh 1: RUN, FETCH REG, FETCH ADRS          
+STA 2800H	
+LDA 1800H		 
+ANI 07H		
+MVI C,84H	;RUN: kwdikos 84H
+CPI 06H	;Sygkrinw me to 110	(1o plhktro)
+JZ PRINT            
+MVI C,80H	;FETCH REG: kwdikos 80H
+CPI 05H	;Sygkrinw me to 101 (2o plhktro)
+JZ PRINT            
+MVI C,82H	;FETCH ADRS: kwdikos 82H
+CPI 03H	;Sygkrinw me to 011	(3o plhktro)
+JZ PRINT            
+
+MOV A,D
+RLC
+MOV D,A
+
+;Grammh 2: 0, STORE/INCR, DECR          
+STA 2800H	
+LDA 1800H		
+ANI 07H		
+MVI C,00H	;0: kwdikos 00H
+CPI 06H		
+JZ PRINT             
+MVI C,83H	;STORE/INCR: kwdikos 83H
+CPI 05H		
+JZ PRINT             
+MVI C,81H	;DECR: kwdikos 81H
+CPI 03H		
+JZ PRINT             
+
+MOV A,D
+RLC
+MOV D,A
+
+;Ta pragmata ginontai pio eykola
+;O kwdikos tou ka8e plhktrou ayksanetai
+;diadoxika apo to 01 ews to 0F
+;Opote ylopoioume tis grammes 3-7 me loop
+
+;Grammes 3 ews 7: plhktra 1 ews F
+MVI B,05H	;Loop counter (5 grammes->5 loops)
+MVI C,00H	;8a exei ton kwdiko twn antisoixwn plhktrwn
+
+LOOP1:
+          
+STA 2800H		
+LDA 1800H		
+ANI 07H		
+INR C
+CPI 06H
+JZ PRINT
+INR C
+CPI 05H
+JZ PRINT
+INR C      
+CPI 03H
+JZ PRINT
+
+MOV A,D
+RLC
+MOV D,A
+
+DCR B
+JNZ LOOP1
+
+JMP START	;An den path8hke tipota, pame sthn arxh
+
+PRINT:		;Emfanizoume ton antistoixo kwdiko sthn o8onh
+
+LXI H,0900H
+MOV A,C	
+ANI 0FH	;Apomonwnw ta 4 LSB
+MOV M,A	;kai ta apo8hkeyw sth 8esh mnhmhs 0900H
+INX H
+MOV A,C		
+ANI F0H	;Apomonwnw ta 4 MSB
+RRC		;Kanw 4 peristrofes
+RRC		;gia na ta balw sta 4 LSB bits
+RRC
+RRC			
+MOV M,A	;Kai ta apo8hkeyw sth 8esh mnhmhs 0901H
+
+LXI D,0900H	;Arxikopoiw sth 8esh 0900H	
+CALL STDM	;kai emfanizw sthn o8onh
+CALL DCD
+
+JMP START
+
+END
